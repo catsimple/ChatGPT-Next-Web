@@ -25,7 +25,7 @@ jobs:
       - name: Fetch upstream changes
         run: git fetch upstream
       - name: Merge upstream changes
-        run: git checkout main && git merge upstream/main # 合并到本地 main 分支
+        run: git checkout main && git merge --allow-unrelated-histories upstream/main # 合并到本地 main 分支
       - id: output-id
         run: |
           VERSION=edge

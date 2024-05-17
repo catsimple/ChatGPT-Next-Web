@@ -1,38 +1,26 @@
-name: Sync Upstream and Build & Push
-
-on:
-  schedule:
-    - cron: '0 0 * * *' # 每天凌晨 0 点执行
-  workflow_dispatch: # 手动触发
-
 jobs:
-  sync-and-build:
+  get-tags:
     runs-on: ubuntu-latest
     env:
       TZ: Asia/Shanghai
-      REGISTRY: ghcr.io
-      IMAGE_NAME: chatgpt-next-web # 替换为你的镜像名称
     outputs:
       tags: ${{ steps.output-id.outputs.v }}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/checkout@v3
-        with:
-          repository: ChatGPTNextWeb/ChatGPT-Next-Web # 这里已经替换为ChatGPTNextWeb/ChatGPT-Next-Web
-          ref: main # 替换为上游仓库的分支名称，例如：main
-          path: upstream
-          fetch-depth: 0 # 拉取所有历史记录
-      - name: Fetch upstream changes
-        run: git fetch upstream
-      - name: Merge upstream changes
-        run: git checkout main && git merge --allow-unrelated-histories upstream/main # 合并到本地 main 分支
       - id: output-id
         run: |
           VERSION=edge
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
           fi
-          echo "v=${VERSION}" >> $GITHUB_OUTPUT       
+          echo "v=${VERSION}" >> $GITHUB_OUTPUT          
+  push-ghcr:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Shanghai
+      REGISTRY: ghcr.io
+    steps:
+      - uses: actions/checkout@v3
       - name: Login
         uses: docker/login-action@v1
         with:
@@ -47,4 +35,4 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ 1.0 }}
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest      
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest       

@@ -1,3 +1,11 @@
+name: Build Docker image to Github
+on:
+  workflow_dispatch: #github页面手动触发
+  push:
+    tags:
+      - "v*.*"
+env:
+  IMAGE_NAME: chatgpt-next-web #这是您的镜像名
 jobs:
   get-tags:
     runs-on: ubuntu-latest
